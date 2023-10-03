@@ -14,7 +14,8 @@ const SettingsPaper = styled(Paper)(({ theme }) => ({
 }));
 
 export default function App() {
-  const [compId, setCompId] = React.useState('');
+  const [selectCompId, setSelectCompId] = React.useState('');
+  const [searchCompId, setSearchCompId] = React.useState('');
   const [comp, setComp] = React.useState({});
   const [comps, setComps] = React.useState([]);
   const [color, setColor] = React.useState('#5458AF');
@@ -26,9 +27,23 @@ export default function App() {
   }
 
   React.useEffect(() => {
-    setComp(comps.find((c) => c.id === compId))
+    setComp(comps.find((c) => c.id === selectCompId))
     randomColor()
-  }, [compId]);
+  }, [selectCompId]);
+
+  React.useEffect(() => {
+    if (searchCompId.match(/^[a-zA-Z]+[0-9]{4}$/) === null) {
+      return;
+    }
+
+    fetch(`https://www.worldcubeassociation.org/api/v0/competitions/${searchCompId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.info('data', data)
+        setComp(data)
+        randomColor()
+      });
+  }, [searchCompId]);
 
   React.useEffect(() => {
     console.info('fetching comps from WCA API')
@@ -81,15 +96,15 @@ export default function App() {
                 <Select
                   labelId="competitions-dropdown"
                   id="competitions-dropdown"
-                  value={compId}
-                  onChange={(event) => setCompId(event.target.value)}
+                  value={selectCompId}
+                  onChange={(event) => setSelectCompId(event.target.value)}
                   input={<OutlinedInput label="Competition" />}>
                   {comps.map((c) => (
                     <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
-              <TextField id="standard-basic" value={compId} label="Competition ID" variant="standard" onChange={(event) => setCompId(event.currentTarget.value)} />
+              <TextField id="standard-basic" value={searchCompId} label="Competition ID" variant="standard" onChange={(event) => setSearchCompId(event.currentTarget.value)} />
               <TextField id="standard-basic" value={color} label="Background hex code" variant="standard" onChange={(event) => setColor(event.currentTarget.value)} />
               <Button onClick={() => {
                 console.info('download pressed');
