@@ -30,7 +30,7 @@ const events = [
   '555bf',
 ]
 
-export default function CompName({ comp, color, printRef }) {
+export default function CompName({ comp, color }) {
   const date = (ymd) => new Date(Date.parse(ymd)).toLocaleString('da-DK', { weekday: 'short', month: 'short', day: 'numeric' })
   const compDays = (s, e) => s === e ? date(s) : `${date(s)} - ${date(e)}`
 
@@ -67,7 +67,7 @@ export default function CompName({ comp, color, printRef }) {
         }}></div>
       </div>
       <Typography variant="h3" component="h2" gutterBottom>
-        {comp?.city}, {comp?.country_iso2}
+        {comp?.city}
       </Typography>
       <Typography variant="h5" component="h2" gutterBottom>
         {compDays(comp?.start_date, comp?.end_date)}
