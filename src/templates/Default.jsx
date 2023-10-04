@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { Paper, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { compDays } from '../utils/dates'
 import MapSvg from './map.svg'
 
 
 const CanvasPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(6),
+  padding: theme.spacing(8),
   ...theme.typography.h3,
   textAlign: 'center',
 }));
@@ -30,10 +31,7 @@ const events = [
   '555bf',
 ]
 
-export default function CompName({ comp, color }) {
-  const date = (ymd) => new Date(Date.parse(ymd)).toLocaleString('da-DK', { weekday: 'short', month: 'short', day: 'numeric' })
-  const compDays = (s, e) => s === e ? date(s) : `${date(s)} - ${date(e)}`
-
+export default function Default({ comp, color }) {
   const PinPosition = (lat, long) => {
     const latMin = 54.3
     const latMax = 58
@@ -45,9 +43,23 @@ export default function CompName({ comp, color }) {
     return { x, y }
   }
 
+  const isDark = (hex) => {
+    if (hex === undefined) {
+      return false
+    }
+    const c = hex.substring(1);      // strip #
+    const rgb = parseInt(c, 16);   // convert rrggbb to decimal
+    const r = (rgb >> 16) & 0xff;  // extract red
+    const g = (rgb >> 8) & 0xff;  // extract green
+    const b = rgb & 0xff;          // extract blue
+
+    return (r * 0.299 + g * 0.587 + b * 0.114) < 186;
+  }
+
   return (
     <CanvasPaper elevation={2} style={{
       background: color,
+      color: isDark(color) ? 'white' : 'black',
     }}>
       {comp?.name}
       <div style={{ position: 'relative' }}>
@@ -56,12 +68,13 @@ export default function CompName({ comp, color }) {
           height: 'auto',
         }} />
         <div style={{
-          width: '10px',
-          height: '10px',
-          background: 'red',
+          width: '48px',
+          height: '48px',
           position: 'absolute',
-          marginTop: '-5px',
-          marginLeft: '-5px',
+          backgroundImage: 'url("logo.png")',
+          backgroundSize: 'cover',
+          marginTop: '-24px',
+          marginLeft: '-24px',
           left: `${PinPosition(comp?.latitude_degrees, comp?.longitude_degrees).x}%`,
           top: `${PinPosition(comp?.latitude_degrees, comp?.longitude_degrees).y}%`
         }}></div>

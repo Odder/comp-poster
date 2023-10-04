@@ -1,11 +1,10 @@
 import * as React from 'react';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import { Paper, Stack, TextField, Button, Select, FormControl, InputLabel, OutlinedInput, MenuItem } from '@mui/material';
+import { Paper, Stack, TextField, Button, Select, FormControl, InputLabel, OutlinedInput, MenuItem, ListItemText } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Default from './templates/Default';
 import html2canvas from 'html2canvas';
-
+import { compDays } from './utils/dates'
 
 const SettingsPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -16,11 +15,9 @@ const SettingsPaper = styled(Paper)(({ theme }) => ({
 export default function App() {
   const [selectCompId, setSelectCompId] = React.useState('');
   const [searchCompId, setSearchCompId] = React.useState('');
-  const [comp, setComp] = React.useState({});
+  const [comp, setComp] = React.useState(null);
   const [comps, setComps] = React.useState([]);
   const [color, setColor] = React.useState('#5458AF');
-
-  const printRef = React.useRef();
 
   const randomColor = () => {
     setColor('#' + Math.floor(Math.random() * 16777215).toString(16));
@@ -51,7 +48,9 @@ export default function App() {
       .then((response) => response.json())
       .then((data) => {
         console.info('data', data)
-        setComps(data.splice(0, 15))
+        const recentComps = data.splice(0, 15)
+        setComps(recentComps)
+        setSelectCompId(recentComps[0].id)
       });
   }, []);
 
@@ -100,24 +99,23 @@ export default function App() {
                   onChange={(event) => setSelectCompId(event.target.value)}
                   input={<OutlinedInput label="Competition" />}>
                   {comps.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                    <MenuItem key={c.id} value={c.id}>
+                      <ListItemText primary={c.name} secondary={compDays(c.start_date, c.end_date, { month: "short" })} />
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
               <TextField id="standard-basic" value={searchCompId} label="Competition ID" variant="standard" onChange={(event) => setSearchCompId(event.currentTarget.value)} />
               <TextField id="standard-basic" value={color} label="Background hex code" variant="standard" onChange={(event) => setColor(event.currentTarget.value)} />
               <Button onClick={() => {
-                console.info('download pressed');
-                download()
+                exportComponentAsPNG(printRef)
               }}>
                 Download
               </Button>
             </Stack>
           </Container>
         </SettingsPaper>
-        <div ref={printRef} >
-          <Default comp={comp} color={color} />
-        </div>
+        {comp && <Default comp={comp} color={color} />}
       </Stack>
     </Container >
   );
